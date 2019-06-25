@@ -1,0 +1,30 @@
+{
+  "name": "serverwithmysql",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "ISC",
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "dependencies": {
+    "express": "^4.17.1",
+    "http": "^0.0.0",
+    "mqtt": "^3.0.0",
+    "mysql": "^2.17.1",
+    "socket.io": "^2.2.0",
+    "uws": "10.148.1"
+  }
+}
