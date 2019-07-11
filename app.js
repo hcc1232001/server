@@ -31,6 +31,6 @@ socketServer.on('connection', (socket) => {
   });
   socket.on('test', (data) => {
     console.log('test');
-    socket.broadcast.emit('test', data);
+    socketServer.broadcast.emit('test', data);
   });
 });
