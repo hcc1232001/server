@@ -42,7 +42,7 @@ socketServer.on('connection', (socket) => {
   socket.on('joinRoom', (playerId) => {
     // this is a player instance
     // compare the player id and assign to the room
-    console.log('a player connected');
+    console.log('a player connected, playerId: ' + playerId);
     // player.push(socket);
     // Object.keys(roomList).forEach(roomId => {
     loopRoomList:
@@ -54,10 +54,13 @@ socketServer.on('connection', (socket) => {
             playersInfo[i]['socket'] = socket;
             playersInfo[i]['joined'] = true;
             playerInRoom[socket.id] = roomId;
+            console.log('room assigned');
           } else {
             // ignore it since someone get the space already
             //
+            console.log('no room found');
           }
+          console.log(roomId, socketServer.sockets.connected[roomId]);
           socketServer.sockets.connected[roomId].emit('playersInfo', playersInfo);
           break loopRoomList;
         }
