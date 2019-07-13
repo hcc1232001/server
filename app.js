@@ -100,12 +100,14 @@ socketServer.on('connection', (socket) => {
       const playersInfo = roomList[socket.id];
       for (let i = 0; i < playersInfo.length; i++) {
         const player = playersInfo[i];
-        const playerId = player['socket'].id;
-        player['socket'].close();
-        player['socket'] = null;
-        player['joined'] = false;
-        player['shakeCount'] = 0;
-        delete playerInRoom[playerId];
+        if (player['socket']) {
+          const playerId = player['socket'].id;
+          player['socket'].close();
+          player['socket'] = null;
+          player['joined'] = false;
+          player['shakeCount'] = 0;
+          delete playerInRoom[playerId];
+        }
       }
     } else if (playerInRoom[socket.id]) {
       // this is a player, tell the game host disconnected?
