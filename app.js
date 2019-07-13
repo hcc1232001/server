@@ -69,7 +69,7 @@ socketServer.on('connection', (socket) => {
           // console.log(roomId, socketServer.sockets.connected[roomId]);
           // socketServer.sockets.connected[roomId].emit('playersInfo', playersInfo);
           socketServer.sockets.connected[roomId].emit('playersInfo', JSON.parse(
-            JSON.stringify(playersInfo, (key, val) => k === 'socket'? undefined: val)
+            JSON.stringify(playersInfo, (key, val) => key === 'socket'? undefined: val)
           ));
           break loopRoomList;
         }
@@ -98,7 +98,7 @@ socketServer.on('connection', (socket) => {
       }
       // socketServer.sockets.connected[roomId].emit('playersInfo', playersInfo);
       socketServer.sockets.connected[roomId].emit('playersInfo', JSON.parse(
-        JSON.stringify(playersInfo, (key, val) => k === 'socket'? undefined: val)
+        JSON.stringify(playersInfo, (key, val) => key === 'socket'? undefined: val)
       ));
       delete playerInRoom[socket.id];
     }
