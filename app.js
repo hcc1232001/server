@@ -102,7 +102,7 @@ socketServer.on('connection', (socket) => {
         const player = playersInfo[i];
         if (player['socket']) {
           const playerId = player['socket'].id;
-          player['socket'].close();
+          player['socket'].disconnect();
           player['socket'] = null;
           player['joined'] = false;
           player['shakeCount'] = 0;
