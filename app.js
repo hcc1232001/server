@@ -17,6 +17,7 @@ const port = process.env.PORT || 3000;
 // const socketServer = socketIo.listen(server);
 const playersPerRoom = 3;
 const socketServer = socketIo.listen(port);
+console.log(`Server running at port `+port);
 
 let roomList = {};
 let playerInRoom = {};
@@ -43,6 +44,7 @@ socketServer.on('connection', (socket) => {
     // this is a player instance
     // compare the player id and assign to the room
     console.log('a player connected, playerId: ' + playerId);
+    // console.log(roomList);
     // player.push(socket);
     // Object.keys(roomList).forEach(roomId => {
     loopRoomList:
@@ -60,8 +62,9 @@ socketServer.on('connection', (socket) => {
             //
             console.log('no room found');
           }
-          console.log(roomId, socketServer.sockets.connected[roomId]);
-          socketServer.sockets.connected[roomId].emit('playersInfo', playersInfo);
+          // console.log(roomId, socketServer.sockets.connected[roomId]);
+          // socketServer.sockets.connected[roomId].emit('playersInfo', playersInfo);
+          socket.broadcast.emit('playersInfo', playersInfo);
           break loopRoomList;
         }
       }
@@ -86,7 +89,8 @@ socketServer.on('connection', (socket) => {
           break;
         }
       }
-      socketServer.sockets.connected[roomId].emit('playersInfo', playersInfo);
+      // socketServer.sockets.connected[roomId].emit('playersInfo', playersInfo);
+      socket.broadcast.emit('playersInfo', playersInfo);
       delete playerInRoom[socket.id];
     }
     // player = player.filter((val, idx, arr) => {
