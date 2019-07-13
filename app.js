@@ -57,10 +57,14 @@ socketServer.on('connection', (socket) => {
             playersInfo[i]['joined'] = true;
             playerInRoom[socket.id] = roomId;
             console.log('room assigned');
+            socket.emit('msg', 'room assigned');
+
           } else {
             // ignore it since someone get the space already
             //
             console.log('no room found');
+            socket.emit('msg', 'no room found');
+
           }
           // console.log(roomId, socketServer.sockets.connected[roomId]);
           // socketServer.sockets.connected[roomId].emit('playersInfo', playersInfo);
@@ -69,6 +73,7 @@ socketServer.on('connection', (socket) => {
         }
       }
     }
+    socket.emit('msg', 'no player data found for playerId: ', playerId);    
   })
 
   socket.on('disconnect', () => {
