@@ -103,10 +103,10 @@ socketServer.on('connection', (socket) => {
         if (player['socket']) {
           const playerId = player['socket'].id;
           player['socket'].disconnect();
-          player['socket'] = null;
-          player['joined'] = false;
-          player['shakeCount'] = 0;
-          delete playerInRoom[playerId];
+          // player['socket'] = null;
+          // player['joined'] = false;
+          // player['shakeCount'] = 0;
+          // delete playerInRoom[playerId];
         }
       }
     } else if (playerInRoom[socket.id]) {
@@ -123,9 +123,12 @@ socketServer.on('connection', (socket) => {
         }
       }
       // socketServer.sockets.connected[roomId].emit('playersInfo', playersInfo);
-      socketServer.sockets.connected[roomId].emit('playersInfo', JSON.parse(
-        JSON.stringify(playersInfo, (key, val) => key === 'socket'? undefined: val)
-      ));
+      if (socketServer.sockets.connected[roomId]) {
+        // if the player is kicked by the host, room socket will be null
+        socketServer.sockets.connected[roomId].emit('playersInfo', JSON.parse(
+          JSON.stringify(playersInfo, (key, val) => key === 'socket'? undefined: val)
+        ));
+      }
       delete playerInRoom[socket.id];
     }
     // player = player.filter((val, idx, arr) => {
