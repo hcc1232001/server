@@ -82,13 +82,15 @@ socketServer.on('connection', (socket) => {
   socket.on('shake', () => {
     const roomId = playerInRoom[socket.id];
     const playersInfo = roomList[roomId];
-    for (let i = 0; i < playersInfo.length; i++) {
-      if (playersInfo[i]['socket'] === socket) {
-        playersInfo[i]['shakeCount']++;
-        socketServer.sockets.connected[roomId].emit('playersInfo', JSON.parse(
-          JSON.stringify(playersInfo, (key, val) => key === 'socket'? undefined: val)
-        ));
-        break;
+    if (playersInfo) {
+      for (let i = 0; i < playersInfo.length; i++) {
+        if (playersInfo[i]['socket'] === socket) {
+          playersInfo[i]['shakeCount']++;
+          socketServer.sockets.connected[roomId].emit('playersInfo', JSON.parse(
+            JSON.stringify(playersInfo, (key, val) => key === 'socket'? undefined: val)
+          ));
+          break;
+        }
       }
     }
   })
