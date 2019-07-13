@@ -55,6 +55,7 @@ socketServer.on('connection', (socket) => {
           if (playersInfo[i]['socket'] === null) {
             playersInfo[i]['socket'] = socket;
             playersInfo[i]['joined'] = true;
+            playersInfo[i]['shakeCount'] = 0;
             playerInRoom[socket.id] = roomId;
             console.log('room assigned');
             socket.emit('msg', 'room assigned');
@@ -78,12 +79,34 @@ socketServer.on('connection', (socket) => {
     socket.emit('msg', 'no player data found for playerId: ', playerId);    
   })
 
+  socket.on('shake', () => {
+    const roomId = playerInRoom[socket.id];
+    const playersInfo = roomList[roomId];
+    for (let i = 0; i < playersInfo.length; i++) {
+      if (playersInfo[i]['socket'] === socket) {
+        playersInfo[i]['shakeCount']++;
+        socketServer.sockets.connected[roomId].emit('playersInfo', JSON.parse(
+          JSON.stringify(playersInfo, (key, val) => key === 'socket'? undefined: val)
+        ));
+        break;
+      }
+    }
+  })
   socket.on('disconnect', () => {
     console.log('player disconnected');
     if (roomList[socket.id]) {
       // this is a game host
       // TODO: disconnect all user in this room?
-
+      const playersInfo = roomList[socket.id];
+      for (let i = 0; i < playersInfo.length; i++) {
+        const player = playersInfo[i];
+        const playerId = player['socket'].id;
+        player['socket'].close();
+        player['socket'] = null;
+        player['joined'] = false;
+        player['shakeCount'] = 0;
+        delete playerInRoom[playerId];
+      }
     } else if (playerInRoom[socket.id]) {
       // this is a player, tell the game host disconnected?
       const roomId = playerInRoom[socket.id];
@@ -93,6 +116,7 @@ socketServer.on('connection', (socket) => {
         if (player['socket'] === socket) {
           player['socket'] = null;
           player['joined'] = false;
+          player['shakeCount'] = 0;
           break;
         }
       }
