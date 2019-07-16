@@ -15,12 +15,20 @@ const port = process.env.PORT || 3000;
 // });
 
 // const socketServer = socketIo.listen(server);
+const PlayerStatus = {
+  idle: 0,
+  joined: 1,
+  started: 2,
+  blocked: 3,
+  ended: 4,
+}
 const playersPerRoom = 3;
 const socketServer = socketIo.listen(port);
 console.log(`Server running at port `+port);
 
 let roomList = {};
 let playerInRoom = {};
+
 socketServer.on('connection', (socket) => {
   // somebody connected
   // maybe game host instance or player instance
@@ -33,7 +41,8 @@ socketServer.on('connection', (socket) => {
       players[i] = {
         playerId: uuid(),
         socket: null,
-        joined: false
+        joined: false,
+        status: PlayerStatus.Idle
       };
     }
     roomList[socket.id] = players;
@@ -52,9 +61,10 @@ socketServer.on('connection', (socket) => {
       const playersInfo = roomList[roomId];
       for (let i = 0; i < playersInfo.length; i++) {
         if (playersInfo[i]['playerId'] === playerId) {
-          if (playersInfo[i]['socket'] === null) {
+          if (playersInfo[i]['socket'] === null && playersInfo[i]['status'] === PlayerStatus.idle) {
             playersInfo[i]['socket'] = socket;
             playersInfo[i]['joined'] = true;
+            playersInfo[i]['status'] = PlayerStatus.joined;
             playersInfo[i]['shakeCount'] = 0;
             playerInRoom[socket.id] = roomId;
             console.log('room assigned');
@@ -79,12 +89,34 @@ socketServer.on('connection', (socket) => {
     socket.emit('msg', 'no player data found for playerId: ', playerId);    
   })
 
+  socket.on('startGame', () => {
+    const roomId = playerInRoom[socket.id];
+    if (roomId) {
+      const playersInfo = roomList[roomId];
+      for (let i = 0; i < playersInfo.length; i++) {
+        if (playersInfo[i]['status'] === PlayerStatus.joined) {
+          playersInfo[i]['status'] === PlayerStatus.started;
+        }
+      }
+    }
+  })
+
+  socket.on('endGame', () => {
+    const roomId = playerInRoom[socket.id];
+    if (roomId) {
+      const playersInfo = roomList[roomId];
+      for (let i = 0; i < playersInfo.length; i++) {
+        playersInfo[i]['status'] === PlayerStatus.ended;
+      }
+    }
+  })
+
   socket.on('shake', () => {
     const roomId = playerInRoom[socket.id];
     const playersInfo = roomList[roomId];
     if (playersInfo) {
       for (let i = 0; i < playersInfo.length; i++) {
-        if (playersInfo[i]['socket'] === socket) {
+        if (playersInfo[i]['socket'] === socket && playersInfo[i]['status'] === PlayerStatus.started) {
           playersInfo[i]['shakeCount']++;
           socketServer.sockets.connected[roomId].emit('playersInfo', JSON.parse(
             JSON.stringify(playersInfo, (key, val) => key === 'socket'? undefined: val)
