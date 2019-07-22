@@ -42,7 +42,7 @@ socketServer.on('connection', (socket) => {
         playerId: uuid(),
         socket: null,
         joined: false,
-        status: PlayerStatus.Idle
+        status: PlayerStatus.idle
       };
     }
     roomList[socket.id] = players;
