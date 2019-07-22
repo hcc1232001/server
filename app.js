@@ -52,11 +52,9 @@ socketServer.on('connection', (socket) => {
   socket.on('joinRoom', (playerId) => {
     // this is a player instance
     // compare the player id and assign to the room
-    console.log('a player connected, playerId: ' + playerId);
-    // console.log(roomList);
-    // player.push(socket);
-    // Object.keys(roomList).forEach(roomId => {
-    loopRoomList:
+    console.log('a player is trying to connect, playerId: ' + playerId);
+    // use to break nested loop
+    // loopRoomList:
     for (let roomId in roomList) {
       const playersInfo = roomList[roomId];
       for (let i = 0; i < playersInfo.length; i++) {
@@ -69,24 +67,38 @@ socketServer.on('connection', (socket) => {
             playerInRoom[socket.id] = roomId;
             console.log('room assigned');
             socket.emit('msg', 'room assigned');
-
+            socket.emit('playerStatus', {
+              roomJoined: true
+            });
           } else {
             // ignore it since someone get the space already
             //
             console.log('no room found');
+            console.log('socket status: ' + (playersInfo[i]['socket'] === null ? 'null': 'not null'));
+            console.log('player ' + i + ' status: ' + (playersInfo[i]['status'] === PlayerStatus.idle ? 'idle': playersInfo[i]['status']));
             socket.emit('msg', 'no room found');
-
+            socket.emit('playerStatus', {
+              roomJoined: false
+            });
+            socket.disconnect();
           }
           // console.log(roomId, socketServer.sockets.connected[roomId]);
           // socketServer.sockets.connected[roomId].emit('playersInfo', playersInfo);
           socketServer.sockets.connected[roomId].emit('playersInfo', JSON.parse(
             JSON.stringify(playersInfo, (key, val) => key === 'socket'? undefined: val)
           ));
-          break loopRoomList;
+          // can use to break nested loop
+          // break loopRoomList;
+          return;
         }
       }
     }
+    // no room found for the user id
     socket.emit('msg', 'no player data found for playerId: ', playerId);    
+    socket.emit('playerStatus', {
+      roomJoined: false
+    });
+    socket.disconnect();
   })
 
   socket.on('startGame', () => {
