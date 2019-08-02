@@ -165,6 +165,7 @@ socketServer.on('connection', (socket) => {
           player['socket'] = null;
           player['joined'] = false;
           player['shakeCount'] = 0;
+          player['status'] = PlayerStatus.idle;
           break;
         }
       }
