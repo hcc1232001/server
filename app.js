@@ -5,22 +5,20 @@ const uuid = require('uuid/v1');
 const port = process.env.PORT || 3000;
 
 // const server = http.createServer((req, res) => {
-//   res.statusCode = 200;
-//   res.setHeader('Content-Type', 'text/html');
-//   res.end('<h1>Hello World.</h1>');
+//   //   res.statusCode = 200;
+//   //   res.setHeader('Content-Type', 'text/html');
+//   //   res.end('<h1>Hello World.</h1>');
+//   res.writeHead(302, {'Location': 'https://hcc1232001.github.io/playground/#/game'});
+//   res.end();
 // });
 
-// server.listen(port,() => {
-//   console.log(`Server running at port `+port);
-// });
 
-// const socketServer = socketIo.listen(server);
 const PlayerStatus = {
   idle: 0,
   joined: 1,
   started: 2,
-  blocked: 3,
   ended: 4,
+  blocked: 3,
 }
 const playersPerRoom = 3;
 const socketServer = socketIo.listen(port);
@@ -68,7 +66,7 @@ socketServer.on('connection', (socket) => {
             console.log('room assigned');
             socket.emit('msg', 'room assigned');
             socket.emit('playerStatus', {
-              roomJoined: true
+              status: 'IDLE'
             });
           } else {
             // ignore it since someone get the space already
@@ -108,6 +106,9 @@ socketServer.on('connection', (socket) => {
       for (let i = 0; i < playersInfo.length; i++) {
         if (playersInfo[i]['status'] === PlayerStatus.joined) {
           playersInfo[i]['status'] === PlayerStatus.started;
+          playersInfo[i]['socket'].emit('gameStart');
+        } else {
+          playersInfo[i]['socket'].emit('gameSkip');
         }
       }
     }
@@ -125,7 +126,9 @@ socketServer.on('connection', (socket) => {
 
   socket.on('shake', () => {
     const roomId = playerInRoom[socket.id];
+    console.log(roomId);
     const playersInfo = roomList[roomId];
+    console.log(playersInfo);
     if (playersInfo) {
       for (let i = 0; i < playersInfo.length; i++) {
         if (playersInfo[i]['socket'] === socket && playersInfo[i]['status'] === PlayerStatus.started) {
